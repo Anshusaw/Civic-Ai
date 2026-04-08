@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>CivicAI – Admin Dashboard</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+		rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+	<style>
+		:root {
+			--ink: #0a0f1e;
+			--card-bg: #111827;
+			--slate: #151e2e;
+			--accent: #00e5a0;
+			--accent2: #3b82f6;
+			--accent3: #f59e0b;
+			--muted: #8892a4;
+			--border: rgba(255, 255, 255, 0.08);
+			--sidebar-w: 240px;
+		}
+
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'DM Sans', sans-serif;
+			background: var(--ink);
+			color: #e2e8f0;
+			display: flex;
+			min-height: 100vh;
+			overflow-x: hidden;
+		}
+
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			font-family: 'Syne', sans-serif;
+		}
+
+		/* SIDEBAR */
+		.sidebar {
+			width: var(--sidebar-w);
+			background: var(--slate);
+			border-right: 1px solid var(--border);
+			display: flex;
+			flex-direction: column;
+			position: fixed;
+			top: 0;
+			left: 0;
+			height: 100vh;
+			z-index: 100;
+			overflow-y: auto;
+		}
+
+		.sidebar-brand {
+			padding: 1.5rem 1.2rem;
+			border-bottom: 1px solid var(--border);
+			font-family: 'Syne', sans-serif;
+			font-weight: 800;
+			font-size: 1.3rem;
+			color: #fff;
+			text-decoration: none;
+			display: block;
+		}
+
+		.sidebar-brand span {
+			color: var(--accent);
+		}
+
+		.sidebar-section {
+			padding: .5rem 1rem .2rem;
+			font-size: .65rem;
+			font-weight: 700;
+			color: var(--muted);
+			letter-spacing: 1px;
+			text-transform: uppercase;
+			margin-top: .5rem;
+		}
+
+		.sidebar-link {
+			display: flex;
+			align-items: center;
+			gap: .7rem;
+			padding: .6rem 1.2rem;
+			font-size: .83rem;
+			font-weight: 500;
+			color: var(--muted);
+			text-decoration: none;
+			border-radius: 8px;
+			margin: .1rem .5rem;
+			transition: all .2s;
+		}
+
+		.sidebar-link:hover {
+			background: rgba(255, 255, 255, .04);
+			color: #fff;
+		}
+
+		.sidebar-link.active {
+			background: rgba(0, 229, 160, .1);
+			color: var(--accent);
+		}
+
+		.sidebar-link i {
+			font-size: .95rem;
+			width: 18px;
+			text-align: center;
+		}
+
+		.sidebar-badge {
+			margin-left: auto;
+			background: rgba(239, 68, 68, .2);
+			color: #f87171;
+			padding: .1rem .45rem;
+			border-radius: 50px;
+			font-size: .65rem;
+			font-weight: 700;
+		}
+
+		.sidebar-footer {
+			margin-top: auto;
+			padding: 1rem 1.2rem;
+			border-top: 1px solid var(--border);
+		}
+
+		.sidebar-user {
+			display: flex;
+			align-items: center;
+			gap: .75rem;
+		}
+
+		.s-avatar {
+			width: 34px;
+			height: 34px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, var(--accent), var(--accent2));
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: .8rem;
+			font-weight: 700;
+			color: var(--ink);
+			flex-shrink: 0;
+		}
+
+		.s-name {
+			font-size: .82rem;
+			font-weight: 600;
+			color: #fff;
+		}
+
+		.s-role {
+			font-size: .72rem;
+			color: var(--muted);
+		}
+
+		/* MAIN */
+		.main-content {
+			margin-left: var(--sidebar-w);
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+
+		.topbar {
+			background: rgba(10, 15, 30, .9);
+			border-bottom: 1px solid var(--border);
+			padding: .8rem 1.5rem;
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			backdrop-filter: blur(20px);
+			position: sticky;
+			top: 0;
+			z-index: 50;
+		}
+
+		.topbar-title {
+			font-family: 'Syne', sans-serif;
+			font-weight: 700;
+			font-size: 1rem;
+			color: #fff;
+		}
+
+		.topbar-search {
+			flex: 1;
+			max-width: 320px;
+		}
+
+		.topbar-search .form-control {
+			background: rgba(255, 255, 255, .04) !important;
+			border: 1px solid var(--border) !important;
+			border-radius: 8px !important;
+			color: #fff !important;
+			font-size: .83rem !important;
+			padding: .45rem .9rem !important;
+		}
+
+		.topbar-search .form-control:focus {
+			border-color: rgba(0, 229, 160, .4) !important;
+			box-shadow: none !important;
+			outline: none !important;
+		}
+
+		.notif-btn {
+			width: 34px;
+			height: 34px;
+			border-radius: 8px;
+			background: rgba(255, 255, 255, .04);
+			border: 1px solid var(--border);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--muted);
+			cursor: pointer;
+			position: relative;
+			transition: all .2s;
+		}
+
+		.notif-btn:hover {
+			background: rgba(255, 255, 255, .07);
+			color: #fff;
+		}
+
+		.notif-dot {
+			position: absolute;
+			top: 6px;
+			right: 6px;
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: #ef4444;
+		}
+
+		.content-area {
+			padding: 1.5rem;
+			flex: 1;
+		}
+
+		/* STAT CARDS */
+		.stat-card {
+			background: var(--card-bg);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.4rem;
+			transition: all .3s;
+			position: relative;
+			overflow: hidden;
+			height: 100%;
+		}
+
+		.stat-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 2px;
+			opacity: 0;
+			transition: opacity .3s;
+		}
+
+		.stat-card:hover {
+			transform: translateY(-2px);
+		}
+
+		.stat-card:hover::before {
+			opacity: 1;
+		}
+
+		.sc-total::before {
+			background: var(--accent);
+		}
+
+		.sc-pending::before {
+			background: #f59e0b;
+		}
+
+		.sc-progress::before {
+			background: #3b82f6;
+		}
+
+		.sc-resolved::before {
+			background: var(--accent);
+		}
+
+		.sc-critical::before {
+			background: #ef4444;
+		}
+
+		.sc-time::before {
+			background: #c084fc;
+		}
+
+		.stat-icon {
+			width: 40px;
+			height: 40px;
+			border-radius: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 1.1rem;
+			margin-bottom: 1rem;
+		}
+
+		.stat-num {
+			font-family: 'Syne', sans-serif;
+			font-size: 1.9rem;
+			font-weight: 800;
+			color: #fff;
+			line-height: 1;
+		}
+
+		.stat-label {
+			font-size: .75rem;
+			color: var(--muted);
+			margin-top: .3rem;
+		}
+
+		.stat-change {
+			font-size: .72rem;
+			margin-top: .5rem;
+		}
+
+		.stat-change.up {
+			color: var(--accent);
+		}
+
+		.stat-change.down {
+			color: #f87171;
+		}
+
+		/* TABLE */
+		.table-card {
+			background: var(--card-bg);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			overflow: hidden;
+		}
+
+		.table-card-header {
+			padding: 1.2rem 1.5rem;
+			border-bottom: 1px solid var(--border);
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			flex-wrap: wrap;
+		}
+
+		.table-card-title {
+			font-family: 'Syne', sans-serif;
+			font-weight: 700;
+			font-size: .95rem;
+			color: #fff;
+			margin: 0;
+		}
+
+		.table {
+			margin: 0;
+		}
+
+		.table th {
+			background: rgba(255, 255, 255, .03);
+			color: var(--muted);
+			font-size: .72rem;
+			font-weight: 700;
+			letter-spacing: .6px;
+			text-transform: uppercase;
+			padding: .8rem 1.2rem;
+			border-color: var(--border) !important;
+		}
+
+		.table td {
+			padding: .85rem 1.2rem;
+			border-color: rgba(255, 255, 255, .04) !important;
+			font-size: .83rem;
+			vertical-align: middle;
+			color: #c8d0de;
+		}
+
+		.table tbody tr {
+			transition: background .15s;
+		}
+
+		.table tbody tr:hover {
+			background: rgba(255, 255, 255, .02);
+		}
+
+		.cmp-id {
+			font-family: 'Syne', sans-serif;
+			font-weight: 700;
+			color: #000;
+			font-size: .8rem;
+		}
+
+		.cmp-title {
+			color: #000;
+			max-width: 200px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.status-badge {
+			padding: .22rem .7rem;
+			border-radius: 50px;
+			font-size: .7rem;
+			font-weight: 700;
+			display: inline-block;
+		}
+
+		.sb-pending {
+			background: rgba(245, 158, 11, .15);
+			color: #f59e0b;
+		}
+
+		.sb-assigned {
+			background: rgba(59, 130, 246, .15);
+			color: #60a5fa;
+		}
+
+		.sb-progress {
+			background: rgba(168, 85, 247, .15);
+			color: #c084fc;
+		}
+
+		.sb-resolved {
+			background: rgba(0, 229, 160, .15);
+			color: var(--accent);
+		}
+
+		.sb-critical {
+			background: rgba(239, 68, 68, .2);
+			color: #ef4444;
+		}
+
+		.priority-dot {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			display: inline-block;
+			margin-right: .4rem;
+		}
+
+		.pd-critical {
+			background: #ef4444;
+		}
+
+		.pd-high {
+			background: #f59e0b;
+		}
+
+		.pd-medium {
+			background: #3b82f6;
+		}
+
+		.pd-low {
+			background: var(--accent);
+		}
+
+		.action-btn {
+			width: 28px;
+			height: 28px;
+			border-radius: 6px;
+			border: 1px solid var(--border);
+			background: rgba(255, 255, 255, .03);
+			color: var(--muted);
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-size: .8rem;
+			cursor: pointer;
+			transition: all .2s;
+			text-decoration: none;
+		}
+
+		.action-btn:hover {
+			background: rgba(0, 229, 160, .1);
+			border-color: rgba(0, 229, 160, .3);
+			color: var(--accent);
+		}
+
+		.filter-btn {
+			background: rgba(255, 255, 255, .04);
+			border: 1px solid var(--border);
+			border-radius: 7px;
+			padding: .35rem .8rem;
+			font-size: .78rem;
+			color: var(--muted);
+			cursor: pointer;
+			transition: all .2s;
+		}
+
+		.filter-btn.active,
+		.filter-btn:hover {
+			background: rgba(0, 229, 160, .1);
+			border-color: rgba(0, 229, 160, .3);
+			color: var(--accent);
+		}
+
+		/* CHARTS (CSS mock) */
+		.chart-card {
+			background: var(--card-bg);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+			height: 100%;
+		}
+
+		.chart-title {
+			font-family: 'Syne', sans-serif;
+			font-weight: 700;
+			font-size: .9rem;
+			color: #fff;
+			margin-bottom: 1.5rem;
+		}
+
+		.bar-chart {
+			display: flex;
+			align-items: flex-end;
+			gap: .5rem;
+			height: 140px;
+		}
+
+		.bar-item {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: .35rem;
+		}
+
+		.bar-fill {
+			width: 100%;
+			border-radius: 4px 4px 0 0;
+			transition: height .5s;
+			position: relative;
+		}
+
+		.bar-fill:hover::after {
+			content: attr(data-val);
+			position: absolute;
+			top: -22px;
+			left: 50%;
+			transform: translateX(-50%);
+			background: rgba(10, 15, 30, .9);
+			color: #fff;
+			font-size: .68rem;
+			padding: .2rem .4rem;
+			border-radius: 4px;
+			white-space: nowrap;
+		}
+
+		.bar-label {
+			font-size: .65rem;
+			color: var(--muted);
+			text-align: center;
+		}
+
+		.donut-wrap {
+			display: flex;
+			align-items: center;
+			gap: 1.5rem;
+		}
+
+		.donut-svg {
+			flex-shrink: 0;
+		}
+
+		.donut-legend {
+			display: flex;
+			flex-direction: column;
+			gap: .5rem;
+		}
+
+		.dl-item {
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+			font-size: .78rem;
+			color: #c8d0de;
+		}
+
+		.dl-dot {
+			width: 10px;
+			height: 10px;
+			border-radius: 50%;
+			flex-shrink: 0;
+		}
+
+		/* HEATMAP MOCK */
+		.heatmap-grid {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: .4rem;
+		}
+
+		.hm-cell {
+			border-radius: 6px;
+			padding: .6rem .3rem;
+			text-align: center;
+			font-size: .65rem;
+			color: #fff;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all .2s;
+		}
+
+		.hm-cell:hover {
+			filter: brightness(1.2);
+			transform: scale(1.05);
+		}
+
+		/* ACTIVITY FEED */
+		.activity-card {
+			background: var(--card-bg);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 1.5rem;
+			height: 100%;
+		}
+
+		.activity-title {
+			font-family: 'Syne', sans-serif;
+			font-weight: 700;
+			font-size: .9rem;
+			color: #fff;
+			margin-bottom: 1rem;
+		}
+
+		.activity-item {
+			display: flex;
+			gap: .75rem;
+			padding: .6rem 0;
+			border-bottom: 1px solid rgba(255, 255, 255, .04);
+		}
+
+		.activity-item:last-child {
+			border-bottom: none;
+		}
+
+		.act-icon {
+			width: 30px;
+			height: 30px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: .8rem;
+			flex-shrink: 0;
+		}
+
+		.act-text {
+			font-size: .8rem;
+			color: #c8d0de;
+			line-height: 1.4;
+		}
+
+		.act-time {
+			font-size: .7rem;
+			color: var(--muted);
+			margin-top: .2rem;
+		}
+
+		@media(max-width:991px) {
+			.sidebar {
+				transform: translateX(-100%);
+			}
+
+			.main-content {
+				margin-left: 0;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- SIDEBAR -->
+	<aside class="sidebar">
+		<a th:href="@{/admin/home}" class="sidebar-brand"><span>Civic</span>AI <span
+				style="font-size:.65rem;font-weight:400;color:var(--muted);display:block;margin-top:-4px;">Admin
+				Console</span></a>
+		<div class="sidebar-section">Overview</div>
+		<a th:href="@{/admin/home}" class="sidebar-link active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+		<a href="#" class="sidebar-link"><i class="bi bi-bar-chart-line-fill"></i> Analytics</a>
+		<a href="#" class="sidebar-link"><i class="bi bi-map-fill"></i> Heatmap</a>
+		<div class="sidebar-section">Complaints</div>
+		<a href="#" class="sidebar-link"><i class="bi bi-list-ul"></i> All Complaints <span
+				class="sidebar-badge">24</span></a>
+		<a href="#" class="sidebar-link"><i class="bi bi-exclamation-circle-fill"></i> Critical <span
+				class="sidebar-badge" style="background:rgba(239,68,68,.2);color:#ef4444;">6</span></a>
+		<a href="#" class="sidebar-link"><i class="bi bi-clock-history"></i> Pending</a>
+		<a href="#" class="sidebar-link"><i class="bi bi-check-circle-fill"></i> Resolved</a>
+		<div class="sidebar-section">Management</div>
+		<a th:href="@{/admin/departments}" class="sidebar-link"><i class="bi bi-buildings-fill"></i> Departments</a>
+		<a th:href="@{/admin/officers}" class="sidebar-link"><i class="bi bi-person-badge-fill"></i> Officers</a>
+		<a href="#" class="sidebar-link"><i class="bi bi-people-fill"></i> Citizens</a>
+		<div class="sidebar-section">System</div>
+		<a href="#" class="sidebar-link"><i class="bi bi-bell-fill"></i> Notifications</a>
+		<a href="#" class="sidebar-link"><i class="bi bi-gear-fill"></i> Settings</a>
+		<div class="sidebar-footer">
+			<div class="sidebar-user">
+				<div>
+					<div class="s-name" th:text="${session.name}"></div>
+					<div class="s-role">System Administrator</div>
+				</div>
+				<form th:action="@{/logout}" method="post" style="display:inline;">
+					<button type="submit" style="color:var(--muted);font-size:.85rem;background:none;border:none;">
+						Logout
+					</button>
+				</form>
+			</div>
+		</div>
+	</aside>
+
+	<!-- MAIN -->
+	<div class="main-content">
+		<div class="topbar">
+			<div class="topbar-title">Dashboard</div>
+			<div class="topbar-search ms-3">
+				<input type="text" class="form-control" placeholder="Search complaints, officers..." />
+			</div>
+			<div class="ms-auto d-flex align-items-center gap-2">
+				<button class="btn btn-sm"
+					style="background:rgba(0,229,160,.1);color:var(--accent);border:1px solid rgba(0,229,160,.2);border-radius:7px;font-size:.78rem;">
+					<i class="bi bi-download me-1"></i> Export
+				</button>
+				<div class="notif-btn"><i class="bi bi-bell-fill"></i>
+					<div class="notif-dot"></div>
+				</div>
+				<div class="s-avatar" style="width:32px;height:32px;">A</div>
+			</div>
+		</div>
+
+		<div class="content-area">
+			<p th:if="${success}" th:text="${success}" class="alert alert-success"></p>
+			<p th:if="${error}" th:text="${error}" class="alert alert-danger"></p>
+			<!-- COMPLAINTS TABLE -->
+			<div class="table-card">
+				<div class="table-card-header">
+					<div class="table-card-title">OFFICERS</div>
+					<button data-bs-toggle="modal" data-bs-target="#newOfficerModal" class="btn btn-sm ms-auto"
+						style="background:rgba(0,229,160,.1);color:var(--accent);border:1px solid rgba(0,229,160,.2);border-radius:7px;font-size:.78rem;">+
+						Add</button>
+					<!-- UPDATE MODAL -->
+					<div class="modal fade" id="newOfficerModal" tabindex="-1">
+						<div class="modal-dialog modal-dialog-centered text-dark">
+							<div class="modal-content">
+								
+									<div class="modal-header">
+										<h5 class="modal-title">New Officer <span id="modalCmpId"></span></h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+									</div>
+									<div class="modal-body">
+										<form th:action="@{/admin/officers/save}" th:object="${officer}" method="post">
+										<!-- Name -->
+										<div class="mb-3">
+											<label class="form-label">Name</label>
+											<input type="text" th:field="*{name}" class="form-control"
+												placeholder="Enter officer name" required>
+										</div>
+			
+										<!-- Email -->
+										<div class="mb-3">
+											<label class="form-label">Email</label>
+											<input type="email" th:field="*{email}" class="form-control"
+												placeholder="Enter email" required>
+										</div>
+			
+										<!-- Phone -->
+										<div class="mb-3">
+											<label class="form-label">Phone</label>
+											<input type="text" th:field="*{phone}" class="form-control"
+												placeholder="Enter phone number">
+										</div>
+			
+										<!-- Department Dropdown -->
+										<div class="mb-3">
+											<label class="form-label">Department</label>
+			
+											<select th:field="*{department}" class="form-select" required>
+												<option value="">-- Select Department --</option>
+			
+												<option th:each="dept : ${departments}" th:value="${dept.id}"
+													th:text="${dept.name}">
+												</option>
+			
+											</select>
+										</div>
+			
+										<!-- Submit Button -->
+										<div class="d-grid">
+											<button type="submit" class="btn btn-success">
+												Register Officer
+											</button>
+										</div>
+
+										</form>
+									</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-borderless">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Name</th>
+								<th>Email</th>
+								<th>Department</th>
+								<th>Phone</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="officer : ${officers}">
+
+							    <td>
+							        <span class="cmp-id" th:text="'#' + ${officer.id}"></span>
+							    </td>
+
+							    <td>
+							        <span class="cmp-title" th:text="${officer.name}"></span>
+							    </td>
+
+							    <td>
+							        <span style="font-size:.75rem;" th:text="${officer.email}"></span>
+							    </td>
+
+							    <td style="font-size:.78rem;" 
+							        th:text="${officer.department != null ? officer.department.name : 'N/A'}">
+							    </td>
+
+							    <td style="font-size:.78rem;" th:text="${officer.phone}"></td>
+
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

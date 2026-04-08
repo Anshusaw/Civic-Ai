@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CivicAI – Officer Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root { --ink:#0a0f1e; --card-bg:#111827; --slate:#151e2e; --accent:#00e5a0; --accent2:#3b82f6; --accent3:#f59e0b; --muted:#8892a4; --border:rgba(255,255,255,0.08); --sidebar-w:220px; }
+    body { font-family:'DM Sans',sans-serif; background:var(--ink); color:#e2e8f0; display:flex; min-height:100vh; }
+    h1,h2,h3,h4,h5,h6 { font-family:'Syne',sans-serif; }
+
+    .sidebar { width:var(--sidebar-w); background:var(--slate); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; height:100vh; z-index:100; overflow-y:auto; }
+    .sidebar-brand { padding:1.3rem 1.2rem; border-bottom:1px solid var(--border); font-family:'Syne',sans-serif; font-weight:800; font-size:1.2rem; color:#fff; text-decoration:none; display:block; }
+    .sidebar-brand span { color:var(--accent); }
+    .sidebar-section { padding:.5rem 1rem .2rem; font-size:.63rem; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:.5rem; }
+    .sidebar-link { display:flex; align-items:center; gap:.65rem; padding:.55rem 1.1rem; font-size:.82rem; font-weight:500; color:var(--muted); text-decoration:none; border-radius:8px; margin:.1rem .4rem; transition:all .2s; }
+    .sidebar-link:hover { background:rgba(255,255,255,.04); color:#fff; }
+    .sidebar-link.active { background:rgba(245,158,11,.1); color:var(--accent3); }
+    .sidebar-link i { font-size:.9rem; width:16px; text-align:center; }
+    .s-badge { margin-left:auto; background:rgba(239,68,68,.2); color:#f87171; padding:.1rem .4rem; border-radius:50px; font-size:.63rem; font-weight:700; }
+    .sidebar-footer { margin-top:auto; padding:.9rem 1.1rem; border-top:1px solid var(--border); }
+    .s-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#f59e0b,#f87171); display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .s-name { font-size:.8rem; font-weight:600; color:#fff; }
+    .s-role { font-size:.7rem; color:var(--muted); }
+
+    .main-content { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+    .topbar { background:rgba(10,15,30,.9); border-bottom:1px solid var(--border); padding:.8rem 1.5rem; display:flex; align-items:center; gap:1rem; backdrop-filter:blur(20px); position:sticky; top:0; z-index:50; }
+    .topbar-title { font-family:'Syne',sans-serif; font-weight:700; font-size:.98rem; color:#fff; }
+    .content-area { padding:1.5rem; flex:1; }
+
+    .stat-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:1.3rem; transition:all .3s; height:100%; }
+    .stat-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; margin-bottom:.8rem; }
+    .stat-num { font-family:'Syne',sans-serif; font-size:1.7rem; font-weight:800; color:#fff; line-height:1; }
+    .stat-label { font-size:.73rem; color:var(--muted); margin-top:.25rem; }
+
+    /* COMPLAINT CARDS */
+    .complaint-card {
+      background:var(--card-bg); border:1px solid var(--border);
+      border-radius:12px; padding:1.3rem; transition:all .3s;
+      border-left:3px solid transparent;
+    }
+    .complaint-card:hover { transform:translateY(-2px); border-color:rgba(255,255,255,.12); }
+    .complaint-card.critical { border-left-color:#ef4444; }
+    .complaint-card.high { border-left-color:#f59e0b; }
+    .complaint-card.medium { border-left-color:#3b82f6; }
+    .complaint-card.low { border-left-color:var(--accent); }
+
+    .cmp-header { display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; margin-bottom:.7rem; }
+    .cmp-id-pill { font-family:'Syne',sans-serif; font-weight:700; font-size:.72rem; color:var(--accent); }
+    .cmp-title-text { font-family:'Syne',sans-serif; font-weight:700; font-size:.88rem; color:#fff; margin-bottom:.3rem; }
+    .cmp-meta { font-size:.75rem; color:var(--muted); display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+    .cmp-meta span { margin-right:.6rem; }
+
+    .status-badge { padding:.2rem .65rem; border-radius:50px; font-size:.68rem; font-weight:700; display:inline-block; }
+    .sb-pending { background:rgba(245,158,11,.15); color:#f59e0b; }
+    .sb-assigned { background:rgba(59,130,246,.15); color:#60a5fa; }
+    .sb-progress { background:rgba(168,85,247,.15); color:#c084fc; }
+    .sb-resolved { background:rgba(0,229,160,.15); color:var(--accent); }
+    .sb-critical { background:rgba(239,68,68,.2); color:#ef4444; }
+
+    .priority-badge { padding:.18rem .6rem; border-radius:50px; font-size:.67rem; font-weight:700; }
+    .pb-critical { background:rgba(239,68,68,.15); color:#ef4444; }
+    .pb-high { background:rgba(245,158,11,.15); color:#f59e0b; }
+    .pb-medium { background:rgba(59,130,246,.15); color:#60a5fa; }
+    .pb-low { background:rgba(0,229,160,.15); color:var(--accent); }
+
+    .action-row { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem; padding-top:.75rem; border-top:1px solid rgba(255,255,255,.05); }
+    .btn-action { padding:.35rem .9rem; border-radius:7px; font-size:.75rem; font-weight:600; border:none; cursor:pointer; transition:all .2s; font-family:'Syne',sans-serif; display:inline-flex; align-items:center; gap:.35rem; }
+    .btn-start { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.2); }
+    .btn-start:hover { background:rgba(59,130,246,.25); }
+    .btn-resolve { background:rgba(0,229,160,.12); color:var(--accent); border:1px solid rgba(0,229,160,.2); }
+    .btn-resolve:hover { background:rgba(0,229,160,.2); }
+    .btn-remark { background:rgba(255,255,255,.04); color:var(--muted); border:1px solid var(--border); }
+    .btn-remark:hover { color:#fff; background:rgba(255,255,255,.07); }
+    .btn-photo { background:rgba(245,158,11,.12); color:#f59e0b; border:1px solid rgba(245,158,11,.2); }
+    .btn-photo:hover { background:rgba(245,158,11,.2); }
+
+    /* TABS */
+    .tab-bar { display:flex; gap:.4rem; padding:.25rem; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; margin-bottom:1.5rem; }
+    .tab-item { flex:1; text-align:center; padding:.45rem; border-radius:8px; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; color:var(--muted); font-family:'Syne',sans-serif; }
+    .tab-item.active { background:var(--card-bg); color:#fff; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+
+    /* MODAL */
+    .modal-content { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; color:#e2e8f0; }
+    .modal-header { border-bottom:1px solid var(--border); }
+    .modal-footer { border-top:1px solid var(--border); }
+    .modal-title { font-family:'Syne',sans-serif; font-weight:700; color:#fff; }
+    .btn-close { filter:invert(1) opacity(.5); }
+    .form-label { font-size:.78rem; font-weight:600; color:#c8d0de; }
+    .form-control, .form-select { background:rgba(255,255,255,.04) !important; border:1px solid var(--border) !important; border-radius:8px !important; color:#fff !important; font-size:.85rem !important; }
+    .form-control:focus, .form-select:focus { border-color:rgba(0,229,160,.4) !important; box-shadow:0 0 0 3px rgba(0,229,160,.08) !important; outline:none !important; }
+    .form-control::placeholder { color:var(--muted) !important; }
+    .form-select option { background:#1a2035; }
+    .btn-modal-save { background:var(--accent); color:var(--ink); font-family:'Syne',sans-serif; font-weight:700; border:none; border-radius:8px; padding:.6rem 1.5rem; font-size:.85rem; }
+    .btn-modal-cancel { background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:8px; padding:.6rem 1.2rem; font-size:.85rem; }
+
+    .profile-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:1.5rem; }
+    .officer-avatar-lg { width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#f59e0b,#f87171); display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; color:#fff; margin-bottom:.75rem; }
+
+    @media(max-width:991px) { .sidebar { transform:translateX(-100%); } .main-content { margin-left:0; } }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a th:href="@{/officer/home}" class="sidebar-brand"><span>Civic</span>AI <span style="font-size:.6rem;font-weight:400;color:var(--muted);display:block;margin-top:-3px;">Officer Portal</span></a>
+  <div class="sidebar-section">Work</div>
+  <a href="officer-dashboard.html" class="sidebar-link active"><i class="bi bi-speedometer2"></i> My Dashboard</a>
+  <a href="#" class="sidebar-link"><i class="bi bi-list-check"></i> My Complaints <span class="s-badge">12</span></a>
+  <a href="#" class="sidebar-link"><i class="bi bi-exclamation-circle-fill"></i> Critical <span class="s-badge" style="background:rgba(239,68,68,.2);color:#ef4444;">3</span></a>
+  <a href="#" class="sidebar-link"><i class="bi bi-check2-circle"></i> Resolved</a>
+  <div class="sidebar-section">Tools</div>
+  <a href="#" class="sidebar-link"><i class="bi bi-camera-fill"></i> Upload Photos</a>
+  <a href="#" class="sidebar-link"><i class="bi bi-chat-left-text-fill"></i> Add Remarks</a>
+  <a href="#" class="sidebar-link"><i class="bi bi-map-fill"></i> View Map</a>
+  <div class="sidebar-section">Account</div>
+  <a href="#" class="sidebar-link"><i class="bi bi-person-circle"></i> My Profile</a>
+  <a href="#" class="sidebar-link"><i class="bi bi-bell-fill"></i> Notifications</a>
+  <div class="sidebar-footer">
+    <div class="d-flex align-items-center gap-2">
+      <div>
+	  	<div class="s-name" th:text="${session.name}" ></div>
+        <div class="s-role">Officer</div>
+      </div>
+	  <form th:action="@{/logout}" method="post" style="display:inline;">
+		  <button type="submit" style="color:var(--muted);font-size:.85rem;background:none;border:none;">
+	          Logout
+	      </button>
+	  </form>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+  <div class="topbar">
+    <div class="topbar-title">Officer Dashboard</div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span style="font-size:.75rem;color:var(--muted);">Electricity Board · Sector 60-65</span>
+      <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;position:relative;">
+        <i class="bi bi-bell-fill" style="font-size:.8rem;"></i>
+        <div style="position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:#ef4444;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div class="row g-3 mb-4">
+      <!-- Officer Profile -->
+      <div class="col-lg-3">
+        <div class="profile-card text-center mb-3">
+          <div class="officer-avatar-lg mx-auto">👷</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:1rem;">Ravi Singh</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem;">Electrical Officer</div>
+          <div style="font-size:.75rem;color:var(--accent3);margin-top:.3rem;">⚡ Electricity Board</div>
+          <div class="d-flex gap-2 justify-content-center mt-3">
+            <div style="text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:1.1rem;">47</div>
+              <div style="font-size:.68rem;color:var(--muted);">Resolved</div>
+            </div>
+            <div style="width:1px;background:var(--border);"></div>
+            <div style="text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:1.1rem;">4.8h</div>
+              <div style="font-size:.68rem;color:var(--muted);">Avg Time</div>
+            </div>
+            <div style="width:1px;background:var(--border);"></div>
+            <div style="text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);font-size:1.1rem;">96%</div>
+              <div style="font-size:.68rem;color:var(--muted);">Rating</div>
+            </div>
+          </div>
+        </div>
+        <!-- Quick Stats -->
+        <div class="stat-card mb-3">
+          <div class="stat-icon" style="background:rgba(239,68,68,.12);color:#f87171;"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <div class="stat-num">3</div>
+          <div class="stat-label">Critical — Act Immediately</div>
+        </div>
+        <div class="stat-card mb-3">
+          <div class="stat-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;"><i class="bi bi-clock-history"></i></div>
+          <div class="stat-num">9</div>
+          <div class="stat-label">Pending Assignment</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(0,229,160,.12);color:var(--accent);"><i class="bi bi-patch-check-fill"></i></div>
+          <div class="stat-num">47</div>
+          <div class="stat-label">Total Resolved This Month</div>
+        </div>
+      </div>
+
+      <!-- COMPLAINTS LIST -->
+      <div class="col-lg-9">
+        <div class="tab-bar mb-3">
+          <div class="tab-item active" onclick="switchTab(this)">All (12)</div>
+          <div class="tab-item" onclick="switchTab(this)">🔴 Critical (3)</div>
+          <div class="tab-item" onclick="switchTab(this)">⏳ Pending (9)</div>
+          <div class="tab-item" onclick="switchTab(this)">⚙️ In Progress (5)</div>
+          <div class="tab-item" onclick="switchTab(this)">✅ Resolved (47)</div>
+        </div>
+
+        <div class="row g-3">
+          <!-- CRITICAL -->
+          <div class="col-12">
+            <div class="complaint-card critical">
+              <div class="cmp-header">
+                <div>
+                  <div class="cmp-id-pill">#CMP-2847</div>
+                  <div class="cmp-title-text">Street light causing road accident risk near school</div>
+                  <div class="cmp-meta">
+                    <span><i class="bi bi-geo-alt-fill me-1"></i>Sector 62, near DAV School</span>
+                    <span><i class="bi bi-clock me-1"></i>2 hours ago</span>
+                    <span><i class="bi bi-person me-1"></i>Citizen: Meena K.</span>
+                  </div>
+                </div>
+                <div class="d-flex flex-column align-items-end gap-1">
+                  <span class="status-badge sb-critical">Critical</span>
+                  <span class="priority-badge pb-critical">High Risk</span>
+                </div>
+              </div>
+              <div style="font-size:.8rem;color:var(--muted);line-height:1.5;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.1);border-radius:7px;padding:.6rem .8rem;">
+                "Three street lights at the intersection have been out for a week. Two near-miss accidents already reported. School children cross here every morning."
+              </div>
+              <div class="action-row">
+                <button class="btn-action btn-start" onclick="openModal('CMP-2847')"><i class="bi bi-play-fill"></i> Start Working</button>
+                <button class="btn-action btn-remark" onclick="openModal('CMP-2847')"><i class="bi bi-chat-text-fill"></i> Add Remark</button>
+                <button class="btn-action btn-photo"><i class="bi bi-camera-fill"></i> Upload Photo</button>
+                <button class="btn-action btn-resolve" onclick="markResolved('CMP-2847')"><i class="bi bi-check-circle-fill"></i> Mark Resolved</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- HIGH -->
+          <div class="col-md-6">
+            <div class="complaint-card high">
+              <div class="cmp-header">
+                <div>
+                  <div class="cmp-id-pill">#CMP-2843</div>
+                  <div class="cmp-title-text">Entire street dark after storm</div>
+                  <div class="cmp-meta">
+                    <span><i class="bi bi-geo-alt-fill me-1"></i>Sector 65</span>
+                    <span><i class="bi bi-clock me-1"></i>Yesterday</span>
+                  </div>
+                </div>
+                <div><span class="status-badge sb-progress">In Progress</span></div>
+              </div>
+              <div class="action-row">
+                <button class="btn-action btn-remark"><i class="bi bi-chat-text-fill"></i> Update</button>
+                <button class="btn-action btn-photo"><i class="bi bi-camera-fill"></i> Photo</button>
+                <button class="btn-action btn-resolve" onclick="markResolved('CMP-2843')"><i class="bi bi-check-circle-fill"></i> Resolve</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEDIUM -->
+          <div class="col-md-6">
+            <div class="complaint-card medium">
+              <div class="cmp-header">
+                <div>
+                  <div class="cmp-id-pill">#CMP-2839</div>
+                  <div class="cmp-title-text">Flickering light outside shop complex</div>
+                  <div class="cmp-meta">
+                    <span><i class="bi bi-geo-alt-fill me-1"></i>Sector 61</span>
+                    <span><i class="bi bi-clock me-1"></i>2 days ago</span>
+                  </div>
+                </div>
+                <div><span class="status-badge sb-assigned">Assigned</span></div>
+              </div>
+              <div class="action-row">
+                <button class="btn-action btn-start"><i class="bi bi-play-fill"></i> Start</button>
+                <button class="btn-action btn-remark"><i class="bi bi-chat-text-fill"></i> Remark</button>
+                <button class="btn-action btn-resolve" onclick="markResolved('CMP-2839')"><i class="bi bi-check-circle-fill"></i> Resolve</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- LOW -->
+          <div class="col-md-6">
+            <div class="complaint-card low">
+              <div class="cmp-header">
+                <div>
+                  <div class="cmp-id-pill">#CMP-2831</div>
+                  <div class="cmp-title-text">Light pole tilted after heavy rain</div>
+                  <div class="cmp-meta">
+                    <span><i class="bi bi-geo-alt-fill me-1"></i>Sector 60</span>
+                    <span><i class="bi bi-clock me-1"></i>3 days ago</span>
+                  </div>
+                </div>
+                <div><span class="status-badge sb-pending">Pending</span></div>
+              </div>
+              <div class="action-row">
+                <button class="btn-action btn-start"><i class="bi bi-play-fill"></i> Start</button>
+                <button class="btn-action btn-remark"><i class="bi bi-chat-text-fill"></i> Remark</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESOLVED -->
+          <div class="col-md-6">
+            <div class="complaint-card" style="opacity:.65;">
+              <div class="cmp-header">
+                <div>
+                  <div class="cmp-id-pill">#CMP-2819</div>
+                  <div class="cmp-title-text">Street light not working — park entrance</div>
+                  <div class="cmp-meta">
+                    <span><i class="bi bi-geo-alt-fill me-1"></i>Sector 63</span>
+                    <span><i class="bi bi-clock me-1"></i>5 days ago</span>
+                  </div>
+                </div>
+                <div><span class="status-badge sb-resolved">Resolved</span></div>
+              </div>
+              <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem;display:flex;align-items:center;gap:.4rem;">
+                <i class="bi bi-check-circle-fill" style="color:var(--accent);"></i>
+                Resolved in 3.2 hours · Proof photo uploaded
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE MODAL -->
+<div class="modal fade" id="updateModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Complaint <span id="modalCmpId" style="color:var(--accent);"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Update Status</label>
+          <select class="form-select">
+            <option>In Progress</option>
+            <option>On Hold</option>
+            <option>Resolved</option>
+            <option>Escalate to Admin</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Add Remark / Notes</label>
+          <textarea class="form-control" rows="4" placeholder="Describe the action taken, materials used, estimated completion..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Upload Resolution Photo</label>
+          <div style="border:2px dashed var(--border);border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;background:rgba(255,255,255,.02);font-size:.82rem;color:var(--muted);">
+            <i class="bi bi-cloud-upload-fill" style="font-size:1.4rem;"></i><br/>
+            Click to upload before/after photos
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Estimated Resolution Time</label>
+          <input type="datetime-local" class="form-control"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-modal-save" onclick="saveUpdate()">Save Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function openModal(id) {
+    document.getElementById('modalCmpId').textContent = '#' + id;
+    new bootstrap.Modal(document.getElementById('updateModal')).show();
+  }
+  function saveUpdate() {
+    bootstrap.Modal.getInstance(document.getElementById('updateModal')).hide();
+    alert('Update saved successfully!');
+  }
+  function markResolved(id) {
+    if (confirm('Mark #' + id + ' as Resolved?')) { alert('#' + id + ' marked as Resolved. Citizen will be notified.'); }
+  }
+  function switchTab(el) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

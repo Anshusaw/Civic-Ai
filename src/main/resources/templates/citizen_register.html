@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CivicAI – Citizen Registration</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root { --ink:#0a0f1e; --card-bg:#111827; --accent:#00e5a0; --accent2:#3b82f6; --muted:#8892a4; --border:rgba(255,255,255,0.08); }
+    body { font-family:'DM Sans',sans-serif; background:var(--ink); color:#e2e8f0; min-height:100vh; }
+    h1,h2,h3,h4,h5,h6 { font-family:'Syne',sans-serif; }
+
+    .reg-navbar { background:rgba(10,15,30,0.9); border-bottom:1px solid var(--border); padding:1rem 0; }
+    .reg-brand { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; color:#fff; text-decoration:none; }
+    .reg-brand span { color:var(--accent); }
+
+    .reg-hero { padding:4rem 0 2rem; text-align:center; }
+    .reg-hero h1 { font-size:clamp(1.8rem,4vw,2.6rem); font-weight:800; color:#fff; letter-spacing:-0.8px; margin-bottom:0.5rem; }
+    .reg-hero p { color:var(--muted); font-size:0.92rem; max-width:440px; margin:0 auto; }
+
+    .steps-bar {
+      display:flex; align-items:center; justify-content:center; gap:0;
+      max-width:500px; margin:2.5rem auto 3rem;
+    }
+    .step-item { display:flex; flex-direction:column; align-items:center; font-size:0.72rem; color:var(--muted); flex:1; text-align:center; }
+    .step-circle {
+      width:36px; height:36px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem;
+      margin-bottom:0.4rem;
+    }
+    .step-circle.active { background:var(--accent); color:var(--ink); box-shadow:0 0 16px rgba(0,229,160,0.3); }
+    .step-circle.done { background:rgba(0,229,160,0.15); color:var(--accent); }
+    .step-circle.pending { background:rgba(255,255,255,0.05); color:var(--muted); border:1px solid var(--border); }
+    .step-line { flex:1; height:2px; background:var(--border); margin-bottom:1.2rem; }
+    .step-line.active { background:var(--accent); }
+
+    .reg-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:2.5rem; max-width:640px; margin:0 auto 4rem; }
+
+    .form-label { font-size:0.8rem; font-weight:600; color:#c8d0de; letter-spacing:0.3px; margin-bottom:0.4rem; }
+    .form-control, .form-select {
+      background:rgba(255,255,255,0.04) !important; border:1px solid var(--border) !important;
+      border-radius:8px !important; color:#fff !important; padding:0.7rem 1rem !important;
+      font-size:0.88rem !important; transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    /* .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%238892a4' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important; } */
+    .form-control:focus, .form-select:focus { border-color:rgba(0,229,160,0.5) !important; box-shadow:0 0 0 3px rgba(0,229,160,0.1) !important; outline:none !important; }
+    .form-control::placeholder { color:var(--muted) !important; }
+    .form-select option { background:#1a2035; color:#fff; }
+    .input-group-text { background:rgba(255,255,255,0.04) !important; border:1px solid var(--border) !important; color:var(--muted) !important; border-right:none !important; border-radius:8px 0 0 8px !important; }
+    .input-group .form-control { border-left:none !important; border-radius:0 8px 8px 0 !important; }
+    .input-group:focus-within .input-group-text { border-color:rgba(0,229,160,0.5) !important; }
+
+    .section-divider { display:flex; align-items:center; gap:1rem; margin:1.5rem 0; }
+    .section-divider span { font-size:0.75rem; font-weight:700; color:var(--accent); letter-spacing:0.8px; text-transform:uppercase; white-space:nowrap; }
+    .section-divider::before, .section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .password-strength { height:4px; border-radius:2px; margin-top:0.4rem; transition:all 0.3s; }
+    .strength-label { font-size:0.72rem; margin-top:0.2rem; }
+
+    .terms-box { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:1rem; font-size:0.82rem; color:var(--muted); line-height:1.5; }
+    .form-check-input { background-color:rgba(255,255,255,0.08) !important; border-color:var(--border) !important; }
+    .form-check-input:checked { background-color:var(--accent) !important; border-color:var(--accent) !important; }
+    .form-check-label { font-size:0.83rem; color:var(--muted); }
+    .form-check-label a { color:var(--accent); text-decoration:none; }
+
+    .btn-register { background:var(--accent); color:var(--ink); font-family:'Syne',sans-serif; font-weight:700; font-size:0.92rem; border:none; border-radius:8px; padding:0.85rem; width:100%; letter-spacing:0.3px; transition:all 0.2s; }
+    .btn-register:hover { opacity:0.88; transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,229,160,0.25); }
+    .btn-back { background:transparent; color:var(--muted); border:1px solid var(--border); font-family:'Syne',sans-serif; font-weight:600; font-size:0.88rem; border-radius:8px; padding:0.85rem; transition:all 0.2s; }
+    .btn-back:hover { border-color:rgba(255,255,255,0.2); color:#fff; }
+
+    .login-link { text-align:center; font-size:0.85rem; color:var(--muted); margin-top:1.5rem; }
+    .login-link a { color:var(--accent); text-decoration:none; font-weight:500; }
+
+    .avatar-select { display:flex; gap:0.75rem; flex-wrap:wrap; }
+    .avatar-opt { width:50px; height:50px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:1.4rem; cursor:pointer; transition:all 0.2s; }
+    .avatar-opt:hover, .avatar-opt.selected { border-color:var(--accent); background:rgba(0,229,160,0.1); }
+
+    .invalid-feedback { font-size:0.75rem; }
+    .form-control.is-invalid { border-color:rgba(239,68,68,0.5) !important; }
+    .form-control.is-valid { border-color:rgba(0,229,160,0.5) !important; }
+  </style>
+</head>
+<body>
+  <nav class="reg-navbar">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a href="/" class="reg-brand"><span>Civic</span>AI</a>
+      <a th:href="@{/civic_login}" style="font-size:0.85rem; color:var(--muted); text-decoration:none;">Already have an account? <span style="color:var(--accent); font-weight:500;">Sign in</span></a>
+    </div>
+  </nav>
+  <p th:if="${msg}" th:text="${msg}" class="alert alert-danger"></p>
+  <div class="reg-hero">
+    <h1>Create Your Account</h1>
+    <p>Join the CivicAI platform and start reporting city issues in under 2 minutes.</p>
+    <!-- Steps -->
+    <div class="steps-bar">
+      <div class="step-item">
+        <div class="step-circle active" id="sc1">1</div>
+        <div>Personal Info</div>
+      </div>
+      <div class="step-line active" id="sl1"></div>
+      <div class="step-item">
+        <div class="step-circle pending" id="sc2">2</div>
+        <div>Contact</div>
+      </div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step-item">
+        <div class="step-circle pending" id="sc3">3</div>
+        <div>Security</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="reg-card">
+      <form id="regForm" th:action="@{/register}" method="post">
+
+        <!-- STEP 1: Personal Info -->
+        <div id="step1">
+          <div class="section-divider"><span>Personal Information</span></div>
+          
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-label">First Name *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                <input type="text" name='fname' class="form-control" placeholder="First Name" required/>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Last Name *</label>
+              <input type="text" name='lname' class="form-control" placeholder="Last Name" required/>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Gender</label>
+            <select name='gender' class="form-select">
+              <option value="" disabled selected>Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="d-flex justify-content-end mt-4">
+            <button type="button" class="btn-register" style="width:auto; padding:0.75rem 2rem;" onclick="nextStep(2)">
+              Next <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Contact -->
+        <div id="step2" style="display:none;">
+          <div class="section-divider"><span>Contact & Address</span></div>
+          <div class="mb-3">
+            <label class="form-label">Email Address *</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="rahul@example.com" required/>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone Number *</label>
+            <div class="input-group">
+              <span class="input-group-text">+91</span>
+              <input type="tel" name="phone" maxlength="10" minlength="10" class="form-control" placeholder="9898989898" required/>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Full Address</label>
+            <textarea name="address" class="form-control" rows="3" placeholder="House No., Street, Landmark..."></textarea>
+          </div>
+          <div class="d-flex gap-3 mt-4">
+            <button type="button" class="btn-back flex-fill" onclick="nextStep(1)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+            <button type="button" class="btn-register flex-fill" onclick="nextStep(3)">Next <i class="bi bi-arrow-right ms-1"></i></button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Security -->
+        <div id="step3" style="display:none;">
+          <div class="section-divider"><span>Account Security</span></div>
+          <div class="mb-3">
+            <label class="form-label">Create Password *</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              <input type="password" name="password" class="form-control" placeholder="Min. 8 characters" id="newPass" oninput="checkStrength(this.value)" required/>
+              <button class="btn" type="button" onclick="toggleVis('newPass','eye1')" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-left:none;border-radius:0 8px 8px 0;color:var(--muted);"><i class="bi bi-eye" id="eye1"></i></button>
+            </div>
+            <div class="password-strength mt-2" id="strengthBar" style="background:var(--border); width:100%;"></div>
+            <div class="strength-label" id="strengthLabel" style="color:var(--muted);"></div>
+          </div>
+          <div class="terms-box mb-3">
+            <strong style="color:#fff; font-size:0.82rem;">Password requirements:</strong>
+            <ul style="padding-left:1.2rem; margin-top:0.4rem; margin-bottom:0;">
+              <li>Minimum 8 characters</li>
+              <li>At least one uppercase letter</li>
+              <li>At least one number</li>
+              <li>At least one special character</li>
+            </ul>
+          </div>
+
+          <div class="d-flex gap-3">
+            <button type="button" class="btn-back flex-fill" onclick="nextStep(2)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+			
+
+			<!--  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
+				      
+			<button type="submit" class="btn-register flex-fill">
+              <i class="bi bi-check-circle-fill me-1"></i> Create Account
+            </button>
+          </div>
+        </div>
+      </form>
+      <div class="login-link">Already have an account? <a th:href="@{/civic_login}">Sign in here</a></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let curStep = 1;
+    function nextStep(n) {
+      document.getElementById('step'+curStep).style.display='none';
+      document.getElementById('step'+n).style.display='block';
+      // Update circles
+      for(let i=1;i<=3;i++) {
+        const sc = document.getElementById('sc'+i);
+        if(i<n) { sc.innerHTML='<i class="bi bi-check"></i>'; sc.className='step-circle done'; }
+        else if(i===n) { sc.textContent=i; sc.className='step-circle active'; }
+        else { sc.textContent=i; sc.className='step-circle pending'; }
+      }
+      for(let i=1;i<=2;i++) {
+        const sl = document.getElementById('sl'+i);
+        sl.className = (i<n) ? 'step-line active' : 'step-line';
+      }
+      curStep=n;
+    }
+    function selectAvatar(el) {
+      document.querySelectorAll('.avatar-opt').forEach(a=>a.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    function toggleVis(id, iconId) {
+      const p=document.getElementById(id), e=document.getElementById(iconId);
+      if(p.type==='password'){p.type='text';e.className='bi bi-eye-slash';}
+      else{p.type='password';e.className='bi bi-eye';}
+    }
+    function checkStrength(val) {
+      const bar=document.getElementById('strengthBar'), lbl=document.getElementById('strengthLabel');
+      let score=0;
+      if(val.length>=8) score++;
+      if(/[A-Z]/.test(val)) score++;
+      if(/[0-9]/.test(val)) score++;
+      if(/[^A-Za-z0-9]/.test(val)) score++;
+      const configs=[
+        {w:'0%',bg:'var(--border)',txt:''},
+        {w:'25%',bg:'#ef4444',txt:'Weak'},
+        {w:'50%',bg:'#f59e0b',txt:'Fair'},
+        {w:'75%',bg:'#3b82f6',txt:'Good'},
+        {w:'100%',bg:'#00e5a0',txt:'Strong'}
+      ];
+      const c=configs[score]||configs[0];
+      bar.style.background=c.bg; bar.style.width=c.w;
+      lbl.textContent=c.txt; lbl.style.color=c.bg;
+    }
+    
+  </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CivicAI – Submit Complaint</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root { --ink:#0a0f1e; --card-bg:#111827; --slate:#1a2035; --accent:#00e5a0; --accent2:#3b82f6; --accent3:#f59e0b; --muted:#8892a4; --border:rgba(255,255,255,0.08); }
+    body { font-family:'DM Sans',sans-serif; background:var(--ink); color:#e2e8f0; }
+    h1,h2,h3,h4,h5,h6 { font-family:'Syne',sans-serif; }
+
+    /* NAVBAR */
+    .navbar { background:rgba(10,15,30,0.95); border-bottom:1px solid var(--border); padding:.9rem 0; position:sticky; top:0; z-index:1000; backdrop-filter:blur(20px); }
+    .navbar-brand { font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem; color:#fff !important; }
+    .navbar-brand span { color:var(--accent); }
+    .nav-link { color:var(--muted) !important; font-size:0.85rem; }
+    .nav-link:hover { color:#fff !important; }
+    .user-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; color:var(--ink); }
+
+    /* LAYOUT */
+    .page-header { padding:2.5rem 0 1.5rem; border-bottom:1px solid var(--border); margin-bottom:2.5rem; }
+    .page-header h1 { font-size:1.8rem; font-weight:800; color:#fff; letter-spacing:-0.5px; margin:0; }
+    .page-header p { color:var(--muted); font-size:0.88rem; margin:0.3rem 0 0; }
+    .breadcrumb-item a { color:var(--muted); text-decoration:none; font-size:0.8rem; }
+    .breadcrumb-item a:hover { color:var(--accent); }
+    .breadcrumb-item.active { color:var(--muted); font-size:0.8rem; }
+    .breadcrumb-divider { color:var(--muted); }
+
+    /* FORM CARD */
+    .form-card { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:2rem; margin-bottom:1.5rem; }
+    .form-card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; color:#fff; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.6rem; padding-bottom:0.8rem; border-bottom:1px solid var(--border); }
+    .form-card-title .fct-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.85rem; }
+
+    .form-label { font-size:0.78rem; font-weight:600; color:#c8d0de; letter-spacing:0.3px; margin-bottom:0.4rem; }
+    .form-label .req { color:#ef4444; }
+    .form-control, .form-select {
+      background:rgba(255,255,255,0.04) !important; border:1px solid var(--border) !important;
+      border-radius:8px !important; color:#fff !important; padding:0.7rem 1rem !important;
+      font-size:0.88rem !important; transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus, .form-select:focus { border-color:rgba(0,229,160,0.5) !important; box-shadow:0 0 0 3px rgba(0,229,160,0.1) !important; outline:none !important; }
+    .form-control::placeholder { color:var(--muted) !important; }
+    .form-select option { background:#1a2035; color:#fff; }
+    .input-group-text { background:rgba(255,255,255,0.04) !important; border:1px solid var(--border) !important; color:var(--muted) !important; border-right:none !important; border-radius:8px 0 0 8px !important; }
+    .input-group .form-control { border-left:none !important; border-radius:0 8px 8px 0 !important; }
+    .input-group:focus-within .input-group-text { border-color:rgba(0,229,160,0.5) !important; }
+    .char-count { font-size:0.72rem; color:var(--muted); text-align:right; margin-top:0.2rem; }
+
+    /* CATEGORY CHIPS */
+    .cat-chips { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .cat-chip { padding:0.4rem 0.9rem; border-radius:50px; font-size:0.78rem; font-weight:600; cursor:pointer; border:1px solid var(--border); color:var(--muted); background:rgba(255,255,255,0.03); transition:all 0.2s; display:flex; align-items:center; gap:0.35rem; }
+    .cat-chip:hover { border-color:rgba(255,255,255,0.2); color:#fff; }
+    .cat-chip.selected { border-color:var(--accent) !important; color:var(--accent) !important; background:rgba(0,229,160,0.1) !important; }
+    .cat-chip[data-cat="garbage"] { }
+    .cat-chip[data-cat="water"] { }
+    .cat-chip[data-cat="road"] { }
+    .cat-chip[data-cat="light"] { }
+    .cat-chip[data-cat="traffic"] { }
+    .cat-chip[data-cat="sewer"] { }
+    .cat-chip[data-cat="other"] { }
+
+    /* UPLOAD */
+    .upload-zone {
+      border:2px dashed var(--border); border-radius:10px; padding:2.5rem;
+      text-align:center; cursor:pointer; transition:all 0.2s;
+      background:rgba(255,255,255,0.02);
+    }
+    .upload-zone:hover, .upload-zone.dragover { border-color:var(--accent); background:rgba(0,229,160,0.05); }
+    .upload-icon { font-size:2rem; color:var(--muted); margin-bottom:0.5rem; }
+    .upload-zone p { font-size:0.83rem; color:var(--muted); margin:0; }
+    .upload-zone span { color:var(--accent); font-weight:600; }
+    .preview-imgs { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem; }
+    .preview-img { width:70px; height:70px; border-radius:8px; object-fit:cover; border:1px solid var(--border); }
+
+    /* AI PREVIEW PANEL */
+    .ai-preview { background:rgba(0,229,160,0.05); border:1px solid rgba(0,229,160,0.2); border-radius:12px; padding:1.5rem; }
+    .ai-preview-title { font-size:0.75rem; font-weight:700; color:var(--accent); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+    .ai-result-row { display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.83rem; }
+    .ai-result-row:last-child { border-bottom:none; }
+    .air-key { color:var(--muted); }
+    .air-val { color:#fff; font-weight:600; }
+    .ai-badge { padding:0.2rem 0.65rem; border-radius:50px; font-size:0.72rem; font-weight:700; }
+    .ai-badge-road { background:rgba(239,68,68,0.15); color:#f87171; }
+    .ai-badge-medium { background:rgba(59,130,246,0.15); color:#60a5fa; }
+    .ai-badge-high { background:rgba(245,158,11,0.15); color:#f59e0b; }
+    .ai-badge-critical { background:rgba(239,68,68,0.2); color:#ef4444; }
+    .confidence-bar { height:4px; background:rgba(255,255,255,0.06); border-radius:2px; margin-top:0.6rem; }
+    .confidence-fill { height:100%; border-radius:2px; background:var(--accent); }
+    .pulse-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); display:inline-block; animation:pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)} }
+
+    /* SUBMIT */
+    .btn-submit { background:var(--accent); color:var(--ink); font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; border:none; border-radius:8px; padding:0.9rem 2.5rem; transition:all 0.2s; }
+    .btn-submit:hover { opacity:.88; transform:translateY(-1px); box-shadow:0 10px 30px rgba(0,229,160,.25); }
+    .btn-cancel { background:transparent; color:var(--muted); border:1px solid var(--border); font-family:'Syne',sans-serif; font-weight:600; font-size:0.88rem; border-radius:8px; padding:0.9rem 2rem; transition:all 0.2s; text-decoration:none; }
+    .btn-cancel:hover { border-color:rgba(255,255,255,.2); color:#fff; }
+
+    /* SIDEBAR */
+    .sidebar-card { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin-bottom:1.2rem; }
+    .sidebar-card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; color:#fff; margin-bottom:1rem; }
+    .dept-item { display:flex; align-items:center; gap:0.75rem; padding:0.5rem; border-radius:8px; transition:background 0.2s; }
+    .dept-item:hover { background:rgba(255,255,255,.03); }
+    .dept-dot { width:8px; height:8px; border-radius:50%; }
+    .dept-name { font-size:0.82rem; color:#c8d0de; }
+    .dept-cat { font-size:0.73rem; color:var(--muted); }
+    .tips-list { list-style:none; padding:0; margin:0; }
+    .tips-list li { font-size:0.8rem; color:var(--muted); padding:0.3rem 0; display:flex; align-items:flex-start; gap:0.5rem; line-height:1.5; }
+    .tips-list li i { color:var(--accent); margin-top:0.1rem; flex-shrink:0; }
+
+    .map-placeholder { background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.2); border-radius:10px; height:140px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--muted); font-size:0.83rem; cursor:pointer; transition:all 0.2s; }
+    .map-placeholder:hover { background:rgba(59,130,246,.12); }
+
+    @media(max-width:768px) { .page-header { padding:1.5rem 0 1rem; margin-bottom:1.5rem; } }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand"  th:href="@{/citizen/home}"><span>Civic</span>AI</a>
+      <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"><i class="bi bi-list fs-4"></i></button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav mx-auto gap-1">
+          <li class="nav-item"><a class="nav-link" th:href="@{/citizen/home}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" th:href="@{/citizen/complaint-submit}">New Complaint</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">My Complaints</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Notifications</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+          <div style="position:relative;cursor:pointer;">
+            <i class="bi bi-bell-fill" style="color:var(--muted);font-size:1rem;"></i>
+            <div style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:#ef4444;"></div>
+          </div>
+          <div class="user-pill">
+            <div class="u-name" th:text="${session.name}" ></div>
+          </div>
+		  <form th:action="@{/logout}" method="post" style="display:inline;">
+			  <button type="submit" style="color:var(--muted);font-size:.85rem;background:none;border:none;">
+		          Logout
+		      </button>
+		  </form>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider:'›'; background:none; padding:0;">
+          <li class="breadcrumb-item"><a th:href="@{/citizen/home}">Dashboard</a></li>
+          <li class="breadcrumb-item active" th:href="@{/citizen/complaint-submit}">New Complaint</li>
+        </ol>
+      </nav>
+      <h1><i class="bi bi-megaphone-fill me-2" style="color:var(--accent); font-size:1.4rem;"></i>File a New Complaint</h1>
+      <p>Describe the city issue you've encountered. AI will auto-categorize and route it.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- MAIN FORM -->
+      <div class="col-lg-8">
+        <!-- Title & Category -->
+        <div class="form-card">
+          <div class="form-card-title">
+            <div class="fct-icon" style="background:rgba(0,229,160,.12);color:var(--accent);"><i class="bi bi-file-text-fill"></i></div>
+            Complaint Details
+          </div>
+		  <form th:action="@{/citizen/complaints/ai_analysis}" method="post">
+          
+	          <div class="mb-3">
+	            <label class="form-label">Description <span class="req">*</span></label>
+	            <textarea name="description" class="form-control" id="complaintDesc" rows="5" placeholder="Provide more details about the issue — location, duration, impact..." oninput="countDesc()" maxlength="1000"></textarea>
+	            <div class="char-count"><span id="descCount">0</span>/1000</div>
+	          </div>
+		  
+			 <div class="mb-3">
+		       <button class="btn-submit">
+		         <i class="bi bi-send-fill me-2"></i> Complaint AI Analysis
+		       </button>
+		     </div>
+		  </form>
+        </div>
+		
+        <!-- AI PREVIEW -->
+
+        <div th:if="${aiResponse}" class="form-card" id="aiPanel" >
+          <div class="form-card-title">
+            <div class="fct-icon" style="background:rgba(0,229,160,.12);color:var(--accent);"><i class="bi bi-cpu-fill"></i></div>
+            AI Detection Preview
+            <span class="pulse-dot ms-auto"></span>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Complaint Title <span class="req">*</span></label>
+            <input name="title" th:value="${aiResponse.title}" type="text" class="form-control" id="complaintTitle" placeholder="e.g. Street light not working in Sector 62" oninput="aiDetect()" maxlength="120"/>
+            <div class="char-count"><span id="titleCount">0</span>/120</div>
+          </div>
+		  
+          <div class="ai-preview">
+            <div class="ai-preview-title"><i class="bi bi-magic"></i> AI Analysis Result</div>
+            <div class="ai-result-row">
+              <span class="air-key">Detected Category</span>
+              <span class="air-val" id="aiCat" th:text='${aiResponse.category}'>—</span>
+            </div>
+            <div class="ai-result-row">
+              <span class="air-key">Assigned Department</span>
+              <span class="air-val" id="aiDept" th:text='${aiResponse.department}'>—</span>
+            </div>
+            <div class="ai-result-row">
+              <span class="air-key">Priority Level</span>
+              <span id="aiPriority" th:text='${aiResponse.priority}'>—</span>
+            </div>
+           </div>
+        </div>
+		<!-- Photo Upload -->
+          <div class="form-card">
+            <div class="form-card-title">
+              <div class="fct-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;"><i class="bi bi-camera-fill"></i></div>
+              Photo Evidence
+              <span style="font-size:0.72rem; color:var(--muted); font-family:'DM Sans',sans-serif; font-weight:400; margin-left:auto;">Optional but recommended</span>
+            </div>
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+              ondragover="event.preventDefault();this.classList.add('dragover')"
+              ondragleave="this.classList.remove('dragover')"
+              ondrop="handleDrop(event)">
+              <input name="photo" type="file" id="fileInput" style="display:none" accept="image/*" multiple onchange="handleFiles(this.files)"/>
+              <div class="upload-icon"><i class="bi bi-cloud-upload-fill"></i></div>
+              <p><span>Browse files</span> or drag & drop here</p>
+              <p style="font-size:.75rem; margin-top:.3rem;">JPG, PNG, WEBP up to 10MB</p>
+            </div>
+            <div class="preview-imgs" id="previewImgs"></div>
+            <div class="mt-2" style="font-size:.75rem; color:var(--muted);">
+              <i class="bi bi-info-circle me-1"></i> AI will analyze your photo to help categorize the complaint automatically.
+            </div>
+          </div>
+          
+        <!-- Location -->
+        <div class="form-card">
+          <div class="form-card-title">
+            <div class="fct-icon" style="background:rgba(59,130,246,.12);color:#60a5fa;"><i class="bi bi-geo-alt-fill"></i></div>
+            Location Details
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label">Sector / Area <span class="req">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-pin-map-fill"></i></span>
+                <input type="text" class="form-control" placeholder="e.g. Sector 62"/>
+              </div>
+            </div>
+           <!-- <div class="col-sm-6">
+              <label class="form-label">Landmark</label>
+              <input type="text" class="form-control" placeholder="Near park gate / bus stop"/>
+            </div>-->
+          </div>
+          <!--<div class="mb-3">
+            <label class="form-label">Full Address / Directions</label>
+            <input type="text" class="form-control" placeholder="Street name, house number, or nearby landmark"/>
+          </div>-->
+          <div class="map-placeholder" onclick="this.innerHTML='<i class=\'bi bi-check-circle-fill\' style=\'font-size:1.5rem;color:var(--accent);\'></i><div style=\'margin-top:.5rem;\'>Location pinned on map</div>'">
+            <i class="bi bi-map-fill" style="font-size:1.8rem; margin-bottom:.5rem;"></i>
+            <div>Click to pin location on map</div>
+            <div style="font-size:0.75rem; margin-top:.3rem; color:rgba(136,146,164,0.7);">or use GPS auto-detect</div>
+          </div>
+          <div class="mt-2">
+            <button class="btn btn-sm" style="background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.2);border-radius:6px;font-size:.78rem;">
+              <i class="bi bi-crosshair me-1"></i> Use My Current GPS Location
+            </button>
+          </div>
+        </div>
+
+
+        <!-- Submit Buttons -->
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="citizen-dashboard.html" class="btn-cancel">Cancel</a>
+          <button class="btn-submit" onclick="submitComplaint()">
+            <i class="bi bi-send-fill me-2"></i> Submit Complaint
+          </button>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="col-lg-4">
+        <!-- Tips -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">📝 Tips for Better Complaints</div>
+          <ul class="tips-list">
+            <li><i class="bi bi-check-circle-fill"></i> Be specific about the location — include sector and landmark.</li>
+            <li><i class="bi bi-check-circle-fill"></i> Mention how long the issue has existed.</li>
+            <li><i class="bi bi-check-circle-fill"></i> Upload a clear photo — AI uses it to detect the issue.</li>
+            <li><i class="bi bi-check-circle-fill"></i> Describe safety risk if any (e.g. flooding, gas leak).</li>
+            <li><i class="bi bi-check-circle-fill"></i> Check if this was already reported to avoid duplicates.</li>
+          </ul>
+        </div>
+
+        <!-- Departments -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">🏛️ Departments</div>
+          <div class="dept-item"><div class="dept-dot" style="background:#00e5a0;"></div><div><div class="dept-name">Sanitation Dept.</div><div class="dept-cat">Garbage, Waste</div></div></div>
+          <div class="dept-item"><div class="dept-dot" style="background:#3b82f6;"></div><div><div class="dept-name">Water Department</div><div class="dept-cat">Leaks, Supply Issues</div></div></div>
+          <div class="dept-item"><div class="dept-dot" style="background:#f59e0b;"></div><div><div class="dept-name">Electricity Board</div><div class="dept-cat">Street Lights, Power</div></div></div>
+          <div class="dept-item"><div class="dept-dot" style="background:#ef4444;"></div><div><div class="dept-name">Public Works Dept.</div><div class="dept-cat">Roads, Potholes</div></div></div>
+          <div class="dept-item"><div class="dept-dot" style="background:#c084fc;"></div><div><div class="dept-name">Traffic Authority</div><div class="dept-cat">Signals, Signs</div></div></div>
+          <div class="dept-item"><div class="dept-dot" style="background:#2dd4bf;"></div><div><div class="dept-name">Sewage & Drainage</div><div class="dept-cat">Blockages, Overflow</div></div></div>
+        </div>
+
+        <!-- Recent complaints -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">📊 Your Recent Complaints</div>
+          <div style="font-size:0.82rem;">
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color:var(--border) !important;">
+              <div><div style="color:#c8d0de;">#CMP-2843</div><div style="color:var(--muted);font-size:.74rem;">Garbage – Sector 63</div></div>
+              <span style="background:rgba(59,130,246,.15);color:#60a5fa;padding:.2rem .6rem;border-radius:50px;font-size:.7rem;font-weight:600;">In Progress</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-2">
+              <div><div style="color:#c8d0de;">#CMP-2791</div><div style="color:var(--muted);font-size:.74rem;">Pothole – MG Road</div></div>
+              <span style="background:rgba(0,229,160,.15);color:var(--accent);padding:.2rem .6rem;border-radius:50px;font-size:.7rem;font-weight:600;">Resolved</span>
+            </div>
+          </div>
+          <a href="citizen-dashboard.html" style="font-size:.78rem;color:var(--accent);text-decoration:none;display:block;margin-top:.5rem;">View all complaints →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const aiData = {
+      'street light': { cat:'⚡ Electrical', dept:'Electricity Board', pri:'Medium', conf:97, badge:'ai-badge-medium' },
+      'garbage': { cat:'🗑️ Sanitation', dept:'Sanitation Dept.', pri:'Medium', conf:94, badge:'ai-badge-medium' },
+      'pothole': { cat:'🚧 Road Damage', dept:'Public Works Dept.', pri:'High', conf:96, badge:'ai-badge-high' },
+      'road': { cat:'🚧 Road Damage', dept:'Public Works Dept.', pri:'High', conf:91, badge:'ai-badge-high' },
+      'water': { cat:'💧 Water Leakage', dept:'Water Department', pri:'High', conf:93, badge:'ai-badge-high' },
+      'sewer': { cat:'🔧 Sewer Blockage', dept:'Sewage & Drainage', pri:'High', conf:89, badge:'ai-badge-high' },
+      'traffic': { cat:'🚦 Traffic Signal', dept:'Traffic Authority', pri:'Medium', conf:88, badge:'ai-badge-medium' },
+      'gas': { cat:'⚠️ Gas Leak', dept:'Safety Dept.', pri:'Critical', conf:99, badge:'ai-badge-critical' },
+    };
+    let aiTimer;
+    function aiDetect() {
+      const t = document.getElementById('complaintTitle');
+      document.getElementById('titleCount').textContent = t.value.length;
+      clearTimeout(aiTimer);
+      aiTimer = setTimeout(() => {
+        const v = t.value.toLowerCase();
+        let match = null;
+        for (const [key, data] of Object.entries(aiData)) {
+          if (v.includes(key)) { match = data; break; }
+        }
+        const panel = document.getElementById('aiPanel');
+        if (match && v.length > 5) {
+          panel.style.display = 'block';
+          document.getElementById('aiCat').textContent = match.cat;
+          document.getElementById('aiDept').textContent = match.dept;
+          document.getElementById('aiPriority').innerHTML = `<span class="ai-badge ${match.badge}">${match.pri}</span>`;
+          document.getElementById('aiConf').textContent = match.conf + '%';
+          document.getElementById('confBar').style.width = match.conf + '%';
+        } else {
+          panel.style.display = 'none';
+        }
+      }, 600);
+    }
+    function countDesc() {
+      document.getElementById('descCount').textContent = document.getElementById('complaintDesc').value.length;
+    }
+    function selectCat(el) {
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    function handleFiles(files) {
+      const prev = document.getElementById('previewImgs');
+      prev.innerHTML = '';
+      Array.from(files).slice(0,5).forEach(f => {
+        const url = URL.createObjectURL(f);
+        const img = document.createElement('img');
+        img.src = url; img.className = 'preview-img'; prev.appendChild(img);
+      });
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('uploadZone').classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    }
+    function submitComplaint() {
+      alert('Complaint #CMP-2848 submitted successfully!\nAI has categorized and assigned it to the relevant department.');
+      window.location.href = 'citizen-dashboard.html';
+    }
+  </script>
+</body>
+</html>
